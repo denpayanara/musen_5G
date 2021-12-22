@@ -127,13 +127,13 @@ df7 = df7[['市区町村名', 'ミリ波', '増減数1', 'sub6', '増減数2']]
 df_diff = df7.query('増減数1 != 0 | 増減数2 != 0') 
 
 # 差分がある時のみ画像を作成しツイート
-if len(df7) > 0:
+if len(df_diff) > 0:
         fig, ax = plt.subplots()
 
         ax.axis('off')
 
-        ax.table(cellText=df7.values,
-                colLabels=df7.columns,
+        ax.table(cellText=df_diff.values,
+                colLabels=df_diff.columns,
                 loc='center'
                 )
 
@@ -146,7 +146,7 @@ if len(df7) > 0:
         access_token = os.environ["ACCESS_TOKEN"]
         access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-        tweet = f"【テスト】楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n奈良県の詳細\nhttps://docs.google.com/spreadsheets/d/1HojKLdBi3DP_qP6_y0gHEYCztmwazzWDc1iDng-nmtU/edit?usp=sharing\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #近畿 #bot\n{str_dateime_now}"
+        tweet = f"楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n奈良県の詳細\nhttps://docs.google.com/spreadsheets/d/1HojKLdBi3DP_qP6_y0gHEYCztmwazzWDc1iDng-nmtU/edit?usp=sharing\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #近畿 #bot\n{str_dateime_now}"
 
         print(tweet)
         
