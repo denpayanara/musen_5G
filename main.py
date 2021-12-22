@@ -157,15 +157,11 @@ if len(df7) > 0:
 
         media_ids = []
 
-        img_url = 'https://denpayanara.github.io/musen_5G/diff.png'
-
-        img = requests.get(img_url).content
-
-        res_media_ids = api.media_upload(filename='img.png', file=BytesIO(img))
+        res_media_ids = api.media_upload("data/diff.png")
 
         media_ids.append(res_media_ids.media_id)
 
-        # api.update_status(status = tweet, media_ids = media_ids)
+        api.update_status(status = tweet, media_ids = media_ids)
 
 # 最新の免許数と現在の時刻をXMLファイルに書き込み保存
 f = open('data/license_count_before.xml', 'w', encoding='UTF-8')
