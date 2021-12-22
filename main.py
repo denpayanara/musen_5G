@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import urllib.parse
+import urllib.request
 import requests
 import csv
 import pandas as pd
@@ -62,7 +63,7 @@ license_count_after = df0.iat[0,1]
 # 前回の免許数を取得
 
 # XMLファイル読み込み
-tree = ET.parse('https://denpayanara.github.io/musen_5G/license_count_before.xml')
+tree = ET.parse(urllib.request.urlopen(url= 'https://denpayanara.github.io/musen_5G/license_count_before.xml'))
 root = tree.getroot()
 
 # 前回の免許数
