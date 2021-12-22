@@ -90,27 +90,5 @@ df6 = df6.fillna('')
 # CSV出力
 df6.to_csv("data/5G_All_List.csv", encoding="utf_8_sig", index=False)
 
-# クロス集計
-df_cross = pd.crosstab(df6['市区町村名'],  [df6['周波数(1)'], df6['周波数(2)'], df6['周波数(3)'], df6['周波数(4)']],)
 
-# 市区町村リスト読込
-city_list = pd.read_csv('city_list.csv',dtype={'団体コード': int, '都道府県名': str, '郡名': str, '市区町村名': str}
-)
-
-# city_listとdf2をマージ
-df7 = ( pd.merge(city_list, df_cross, on=["市区町村名"], how="left") )
-
-# ソート
-df7.sort_values("団体コード", inplace=True)
-
-# 不要列の削除(団体コード、都道府県名、郡名)
-df7 = df7.drop(df7.columns[[0,1,2]], axis=1).fillna(0)
-
-# df7の列名をまとめて変更
-df7.columns = ['市区町村名','ミリ波','sub6']
-
-df7 = df7.astype({'ミリ波': int, 'sub6': int})
-
-# クロス集計をCSVで保存
-df7.to_csv('data/Rakuten_5G.csv', encoding="utf_8_sig", index=False)
 
