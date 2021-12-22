@@ -148,6 +148,8 @@ if len(df7) > 0:
 
         tweet = f"【テスト】楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n奈良県の詳細\nhttps://docs.google.com/spreadsheets/d/1HojKLdBi3DP_qP6_y0gHEYCztmwazzWDc1iDng-nmtU/edit?usp=sharing\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #近畿 #bot\n{str_dateime_now}"
 
+        print(tweet)
+        
         auth = tweepy.OAuthHandler(api_key, api_secret)
         auth.set_access_token(access_token, access_token_secret)
 
@@ -163,7 +165,7 @@ if len(df7) > 0:
 
         media_ids.append(res_media_ids.media_id)
 
-        api.update_status(status = tweet, media_ids = media_ids)
+        # api.update_status(status = tweet, media_ids = media_ids)
 
 # 最新の免許数と現在の時刻をXMLファイルに書き込み保存
 f = open('data/license_count_before.xml', 'w', encoding='UTF-8')
