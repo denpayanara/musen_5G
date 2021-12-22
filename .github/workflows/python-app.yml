@@ -2,6 +2,8 @@ name: Python application
 
 on:
   workflow_dispatch:
+  schedule:
+  - cron:  '* 22 * * *'
 
 
 jobs:
