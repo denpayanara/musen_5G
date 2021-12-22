@@ -62,11 +62,11 @@ license_count_after = df0.iat[0,1]
 # 前回の免許数を取得
 
 # XMLファイル読み込み
-tree = ET.parse('license_count_before.xml')
-root = tree.getroot()
+# tree = ET.parse('license_count_before.xml')
+# root = tree.getroot()
 
 # 前回の免許数
-license_count_before = root[0].text
+# license_count_before = root[0].text
 
 # データランダリング
 
