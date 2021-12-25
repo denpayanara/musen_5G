@@ -146,8 +146,8 @@ if len(df_diff) > 0:
         access_token = os.environ["ACCESS_TOKEN"]
         access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-        tweet = f"楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbypaps4FlOOET3ZBtZPVfqQmuuBd-diRPV8UL2hywDM83CbETt6zWxqIMg3Rh6xpzqOLA/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot\n{str_dateime_now}"
-
+        tweet = f"楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot\n{str_dateime_now}"
+        
         print(tweet)
         
         auth = tweepy.OAuthHandler(api_key, api_secret)
