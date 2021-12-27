@@ -1,155 +1,177 @@
 # coding: utf-8
 
 import urllib.parse
-import urllib.request
-import requests
-import csv
 import pandas as pd
+import requests
 import datetime
+import plotly.figure_factory as ff
 import xml.etree.ElementTree as ET
-import matplotlib.pyplot as plt
-import japanize_matplotlib
 import os
 import tweepy
-from io import BytesIO
 
-# 今日の年月日を取得 
-DIFF_JST_FROM_UTC = 9
-now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
-today = now.date()
-
-# 年月日時間
-str_dateime_now = now.strftime("%Y/%m/%d %H:%M")
-
-# api設定
-api = {
+rakuten = {
     # 1:免許情報検索  2: 登録情報検索
     "ST": 1,
     # 詳細情報付加 0:なし 1:あり
-    "DA": 1,
+    "DA": 0,
     # スタートカウント
     "SC": 1,
     # 取得件数
-    "DC": 2,
+    "DC": 3,
     # 出力形式 1:CSV 2:JSON 3:XML
-    "OF": 1,
+    "OF": 2,
     # 無線局の種別
     "OW": "FB",
     # 所轄総合通信局
     "IT": "E",
     # 都道府県/市区町村
     "HCV": 29000,
-    # 周波数（始）
-    "FF": 3849.99,
-    # 周波数（単位）
-    "HZ": 2,
     # 免許人名称/登録人名称
-    "NA": "楽天モバイル株式会社",
+    "NA": "楽天モバイル",
 }
 
-parm = urllib.parse.urlencode(api, encoding="shift-jis")
+def musen_api(d):
 
-res = requests.get("https://www.tele.soumu.go.jp/musen/list", parm)
-res.raise_for_status()
+    parm = urllib.parse.urlencode(d, encoding="shift-jis")
+    r = requests.get("https://www.tele.soumu.go.jp/musen/list", parm)
 
-cr = csv.reader(res.text.splitlines(), delimiter=",")
-data = list(cr)
+    return r.json()
 
-df0 = pd.DataFrame(data).dropna(how="all")
+def band_select(d, start, end, unit):
 
-# 最新の免許数
-license_count_after = df0.iat[0,1]
+    d["FF"] = start
+    d["TF"] = end
+    d["HZ"] = unit
 
-# 前回の免許数を取得
+    data = musen_api(d)
 
-# XMLファイル読み込み
-tree = ET.parse(urllib.request.urlopen(url= 'https://denpayanara.github.io/musen_5G/license_count_before.xml'))
-root = tree.getroot()
+    totalCount = int(data['musenInformation']['totalCount'])
 
-# 前回の免許数
-license_count_before = root[0].text
+    df = pd.json_normalize(data, "musen").rename(columns={"listInfo.tdfkCd": "name"})
 
-# データランダリング
+    se = df.value_counts("name")
 
-#市区町村名
-df1 = df0[2].str.split(r'奈良県', expand=True)
-df2 = df1.drop(df1.columns[[0]], axis=1)
-df2[1] = df1[1].str.replace("^(添上郡|山辺郡|生駒郡|磯城郡|宇陀郡|高市郡|北葛城郡|吉野郡)", "", regex=True)
-df2 = df2.rename(columns={1:'市区町村名'})
+    return se, totalCount
 
-df3 = df0.loc[:,[4,5]].rename(columns={4:'免許の年月日', 5:'免許人の氏名又は名称'})
+# ミリ波
 
-df4 = df0[23].str.split(r'\\t|\\n', expand=True).rename(columns={0: "電波の型式(1)", 1: "周波数(1)", 2: "空中線電力(1)", 3: "電波の型式(2)", 4: "周波数(2)", 5: "空中線電力(2)", 6: "電波の型式(3)", 7: "周波数(3)", 8: "空中線電力(3)", 9: "電波の型式(4)", 10: "周波数(4)", 11: "空中線電力(4)"})
+se_milli, totalCount = band_select(rakuten, 26.5, 29.5, 3)
 
-df5 = df2.join(df3)
-df6 = df5.join(df4)
+# 総件数
+milli_totalCount = totalCount
 
-df6 = df6.drop(df6.index[0])
+se_milli = se_milli
 
-df6 = df6.fillna('')
+# Sub6
 
-# CSV出力
-df6.to_csv("data/5G_All_List.csv", encoding="utf_8_sig", index=False)
+se_sub6, totalCount= band_select(rakuten, 3300, 4200, 2)
 
-# クロス集計
-df_cross = pd.crosstab(df6['市区町村名'],  [df6['周波数(1)'], df6['周波数(2)'], df6['周波数(3)'], df6['周波数(4)']],)
+# 総件数
+sub6_totalCount = totalCount
 
-# 市区町村リスト読込
-city_list = pd.read_csv('city_list.csv',dtype={'団体コード': int, '都道府県名': str, '郡名': str, '市区町村名': str}
+se_sub6 = se_sub6
+
+# 結合
+
+df0 = (
+    pd.concat([se_milli.rename("ミリ波"), se_sub6.rename("sub6")], axis=1)
+    .rename_axis("場所")
+    .reset_index()
 )
 
-# city_listとdf2をマージ
-df7 = ( pd.merge(city_list, df_cross, on=["市区町村名"], how="left") )
+# 市区町村リスト読込
 
-# ソート
-df7.sort_values("団体コード", inplace=True)
+df_code = pd.read_csv(
+    "city_list.csv",
+    dtype={"団体コード": int, "都道府県名": str, "郡名": str, "市区町村名": str},
+)
 
-# 不要列の削除(団体コード、都道府県名、郡名)
-df7 = df7.drop(df7.columns[[0,1,2]], axis=1).fillna(0)
+df_code["市区町村名"] = df_code["郡名"].fillna("") + df_code["市区町村名"]
+df_code.drop("郡名", axis=1, inplace=True)
 
-# df7の列名をまとめて変更
-df7.columns = ['市区町村名','ミリ波','sub6']
+df_code["場所"] = df_code["都道府県名"] + df_code["市区町村名"]
 
-df7 = df7.astype({'ミリ波': int, 'sub6': int})
+df1 = pd.merge(df_code, df0, on=["場所"], how="left")
+df1["団体コード"] = df1["団体コード"].astype("Int64")
 
-# クロス集計をCSVで保存
-df7.to_csv('data/Rakuten_5G.csv', encoding="utf_8_sig", index=False)
+df1.set_index("団体コード", inplace=True)
+df1.sort_index(inplace=True)
+
+df1["市区町村名"] = df1["市区町村名"].str.replace("^(添上郡|山辺郡|生駒郡|磯城郡|宇陀郡|高市郡|北葛城郡|吉野郡)", "", regex=True)
+
+
+df1["ミリ波"] = df1["ミリ波"].fillna(0).astype(int)
+df1["sub6"] = df1["sub6"].fillna(0).astype(int)
+
+df2 = df1.reindex(columns=["市区町村名", "ミリ波", "sub6"])
+
+# CSV保存
+df2.to_csv('data/Rakuten_5G.csv', encoding="utf_8_sig", index=False)
+
+df3 = df2
 
 # 前回の値を詠み込み
 old_data = pd.read_csv('https://denpayanara.github.io/musen_5G/Rakuten_5G.csv')
 
-df7['増減数1'] = df7['ミリ波'] - old_data['ミリ波']
+df3['増減数1'] = df2['ミリ波'] - old_data['ミリ波']
 
-df7['増減数2'] = df7['sub6'] - old_data['sub6']
+df3['増減数2'] = df2['sub6'] - old_data['sub6']
 
-df7 = df7[['市区町村名', 'ミリ波', '増減数1', 'sub6', '増減数2']]
+df3 = df3[['市区町村名', 'ミリ波', '増減数1', 'sub6', '増減数2']]
 
-df_diff = df7.query('増減数1 != 0 | 増減数2 != 0') 
+df3 = df3.fillna(0).astype({'増減数1': int, '増減数2': int})
+
+df_diff = df3.query('増減数1 != 0 | 増減数2 != 0')
 
 # 差分がある時のみ画像を作成しツイート
-if len(df_diff) > 0:
-        fig, ax = plt.subplots()
+if len(df3) > 0: # df_diffに戻す事！
 
-        ax.axis('off')
+        # 今日の年月日を取得 
+        DIFF_JST_FROM_UTC = 9
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
 
-        ax.table(cellText=df_diff.values,
-                colLabels=df_diff.columns,
-                loc='center'
-                )
+        fig = ff.create_table(df3) # df_diffに戻す事
 
-        # 背景色をホワイトにして保存
-        fig.patch.set_facecolor('white')
-        plt.savefig("data/diff.png", format="png", bbox_inches='tight', dpi=300)
+        # 下部に余白を付けて更新日を表記
+        fig.update_layout(
+        title_text = now.strftime("%Y年%m月%d日") + ' 時点のデータです。',
+        title_x = 0.98,
+        title_y = 0.025,
+        title_xanchor = 'right',
+        title_yanchor = 'bottom',
+        # 余白の設定
+        margin = dict(l = 0, r = 0, t = 0, b = 45)
+
+        ) 
+
+        # タイトルフォントサイズ
+        fig.layout.title.font.size = 10
+
+        fig.write_image('data/diff.png', engine='kaleido', scale=10)
+
+
+        # 前回の免許数を取得
+
+        # XMLファイル読み込み
+        tree = ET.parse(urllib.request.urlopen(url= 'https://denpayanara.github.io/musen_5G/license_count_before.xml'))
+
+        root = tree.getroot()
+
+        # ミリ波、前回免許数
+        mmwave_count_before = root[0].text
+
+        #  sub6、前回免許数
+        sub6_count_before = root[1].text
+
+        # ツイート
 
         api_key = os.environ["API_KEY"]
         api_secret = os.environ["API_SECRET_KEY"]
         access_token = os.environ["ACCESS_TOKEN"]
         access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-        tweet = f"楽天モバイル 5G免状更新\n\n{license_count_before}→{license_count_after}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot\n{str_dateime_now}"
-        
-        print(tweet)
-        
+        tweet = f"【テスト】楽天モバイル 5G免状更新\n\nミリ波:{mmwave_count_before}→{milli_totalCount}\nsub6:{sub6_count_before}→{sub6_totalCount}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot"
+
         auth = tweepy.OAuthHandler(api_key, api_secret)
         auth.set_access_token(access_token, access_token_secret)
 
@@ -163,9 +185,18 @@ if len(df_diff) > 0:
 
         api.update_status(status = tweet, media_ids = media_ids)
 
-# 最新の免許数と現在の時刻をXMLファイルに書き込み保存
-f = open('data/license_count_before.xml', 'w', encoding='UTF-8')
+        # 最新の免許数と現在の時刻をXMLファイルに書き込み保存
+        f = open('data/license_count_before.xml', 'w', encoding='UTF-8')
 
-f.write(f'<?xml version="1.0" encoding="UTF-8" ?><musen_5G><count>{license_count_after}</count><date>{str_dateime_now}</date></musen_5G>')
+        f.write(f'<?xml version="1.0" encoding="UTF-8" ?><musen_5G><mmwave_count>{milli_totalCount}</mmwave_count><sub6_count>{sub6_totalCount}</sub6_count><date>{now.strftime("%Y/%m/%d %H:%M")}</date></musen_5G>')
 
-f.close()
+        f.close()
+
+else:
+        r = requests.get('https://denpayanara.github.io/musen_5G/license_count_before.xml')
+
+        f = open('data/license_count_before.xml', 'w', encoding='UTF-8')
+
+        f.write(r.text)
+
+        f.close()
