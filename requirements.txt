@@ -1,5 +1,6 @@
 pandas
 requests
 urllib3
-japanize-matplotlib
+plotly
+kaleido
 tweepy
