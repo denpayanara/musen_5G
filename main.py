@@ -124,13 +124,13 @@ df3 = df3.fillna(0).astype({'増減数1': int, '増減数2': int})
 df_diff = df3.query('増減数1 != 0 | 増減数2 != 0')
 
 # 差分がある時のみ画像を作成しツイート
-if len(df3) > 0: # df_diffに戻す事！
+if len(df_diff) > 0:
 
         # 今日の年月日を取得 
         DIFF_JST_FROM_UTC = 9
         now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
 
-        fig = ff.create_table(df3) # df_diffに戻す事
+        fig = ff.create_table(df_diff)
 
         # 下部に余白を付けて更新日を表記
         fig.update_layout(
@@ -146,7 +146,8 @@ if len(df3) > 0: # df_diffに戻す事！
 
         # タイトルフォントサイズ
         fig.layout.title.font.size = 10
-
+        
+        # scale=10だと400 Bad Request
         fig.write_image('data/diff.png', engine='kaleido', scale=1)
 
 
@@ -170,7 +171,7 @@ if len(df3) > 0: # df_diffに戻す事！
         access_token = os.environ["ACCESS_TOKEN"]
         access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-        tweet = f"【テスト】楽天モバイル 5G免状更新\n\nミリ波:{mmwave_count_before}→{milli_totalCount}\nsub6:{sub6_count_before}→{sub6_totalCount}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot"
+        tweet = f"楽天モバイル 5G免状更新\n\nミリ波:{mmwave_count_before}→{milli_totalCount}\nsub6:{sub6_count_before}→{sub6_totalCount}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot"
 
         auth = tweepy.OAuthHandler(api_key, api_secret)
         auth.set_access_token(access_token, access_token_secret)
