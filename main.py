@@ -147,7 +147,7 @@ if len(df3) > 0: # df_diffに戻す事！
         # タイトルフォントサイズ
         fig.layout.title.font.size = 10
 
-        fig.write_image('data/diff.png', engine='kaleido', scale=10)
+        fig.write_image('data/diff.png', engine='kaleido', scale=1)
 
 
         # 前回の免許数を取得
