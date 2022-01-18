@@ -92,7 +92,7 @@ df1["sub6"] = df1["sub6"].fillna(0).astype(int)
 
 df2 = df1.reindex(columns=["市区町村名", "ミリ波", "sub6"])
 
-df3 = df2
+df3 = df2.copy()
 
 # 前回の値を詠み込み
 old_data = pd.read_csv('data/Rakuten_5G.csv')
