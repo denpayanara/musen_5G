@@ -5,7 +5,6 @@ on:
   schedule:
   - cron:  '0 18 * * *'
 
-
 jobs:
   build:
   
@@ -31,9 +30,16 @@ jobs:
         API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-    - name: deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./data
-        publish_branch: gh-pages
+    - name: git setting
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+    - name: Commit files
+      run: |
+        git add -N .
+        if ! git diff --exit-code --quiet
+        then
+          git add .
+          git commit -m "ファイル更新" -a
+          git push
+        fi
