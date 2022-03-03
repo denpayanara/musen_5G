@@ -27,11 +27,11 @@ if date != datetime.date.today():
     auth = tweepy.OAuthHandler(api_key, api_secret)
     auth.set_access_token(access_token, access_token_secret)
 
-    api = tweepy.API(auth)
+    '''api = tweepy.API(auth)
     media_ids = []
     res_media_ids = api.media_upload("data/diff.png")
     media_ids.append(res_media_ids.media_id)
-    # api.update_status(status = text, media_ids = media_ids)
+    api.update_status(status = text, media_ids = media_ids)'''
 
     # LINE
     line_bot_api = LineBotApi(os.environ["LINE_CHANNEL_ACCESS_TOKEN"])
@@ -39,9 +39,6 @@ if date != datetime.date.today():
     line_bot_api.broadcast(
         messages = [
             TextSendMessage(text = text),
-            '''ImageSendMessage(
-                original_content_url = 'https://github.com/denpayanara/musen_5G/blob/main/data/diff.png',
-                preview_image_url = 'https://github.com/denpayanara/musen_5G/blob/main/data/diff.png'
-            )'''
+
         ]
     )
