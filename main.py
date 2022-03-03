@@ -137,7 +137,7 @@ if len(df_diff) > 0:
         # 前回の免許数を取得
 
         # XMLファイル読み込み
-        tree = ET.parse('license_total_number_before.xml')
+        tree = ET.parse('data/license_total_number_before.xml')
 
         root = tree.getroot()
 
