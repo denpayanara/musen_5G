@@ -1,12 +1,12 @@
 import datetime
-import os
+# import os
 import urllib.parse
 import xml.etree.ElementTree as ET
 
 import pandas as pd
 import requests
 import plotly.figure_factory as ff
-import tweepy
+# import tweepy
 
 Rakuten_5G = {
     # 1:免許情報検索  2: 登録情報検索
@@ -107,7 +107,7 @@ df3 = df3.fillna(0).astype({'増減数1': int, '増減数2': int})
 
 df_diff = df3.query('増減数1 != 0 | 増減数2 != 0')
 
-# 差分がある時のみ画像を作成しツイート
+# 差分がある時、画像とテキストファイルを作成
 if len(df_diff) > 0:
 
         # 今日の年月日を取得 
@@ -117,14 +117,13 @@ if len(df_diff) > 0:
 
         # 下部に余白を付けて更新日を表記
         fig.update_layout(
-        title_text = now.strftime("%Y年%m月%d日") + ' 時点のデータです。',
-        title_x = 0.98,
-        title_y = 0.025,
-        title_xanchor = 'right',
-        title_yanchor = 'bottom',
-        # 余白の設定
-        margin = dict(l = 0, r = 0, t = 0, b = 45)
-
+            title_text = now.strftime("%Y年%m月%d日") + ' 時点のデータです。',
+            title_x = 0.98,
+            title_y = 0.025,
+            title_xanchor = 'right',
+            title_yanchor = 'bottom',
+            # 余白の設定
+            margin = dict(l = 0, r = 0, t = 0, b = 45)
         ) 
 
         # タイトルフォントサイズ
@@ -138,45 +137,23 @@ if len(df_diff) > 0:
 
         # XMLファイル読み込み
         tree = ET.parse('data/license_total_number_before.xml')
-
+        
         root = tree.getroot()
 
         # ミリ波、前回免許数
-        mmWave_count_before = root[0].text
+        mmWave_count_before = root.find('mmwave_count').text
 
         #  sub6、前回免許数
-        sub6_count_before = root[1].text
+        sub6_count_before = root.find('sub6_count').text
 
-        # ツイート
 
-        api_key = os.environ["API_KEY"]
-        api_secret = os.environ["API_SECRET_KEY"]
-        access_token = os.environ["ACCESS_TOKEN"]
-        access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
-
-        tweet = f"楽天モバイル 5G免状更新\n\n\
-            ミリ波:{mmWave_count_before}→{mmWave_total_number}\n\
-            sub6:{sub6_count_before}→{sub6_total_number}\n\n\
-            発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n\
-            5G免状数は基地局数とは等しくありません\n\n\
-            #楽天モバイル #奈良 #bot"
-
-        auth = tweepy.OAuthHandler(api_key, api_secret)
-        auth.set_access_token(access_token, access_token_secret)
-
-        api = tweepy.API(auth)
-
-        media_ids = []
-
-        res_media_ids = api.media_upload("data/diff.png")
-
-        media_ids.append(res_media_ids.media_id)
-
-        api.update_status(status = tweet, media_ids = media_ids)
+        # send_sns.pyで使うファイルを作成
+        text = f"5G免許更新\n\nミリ波:{mmWave_count_before}→{mmWave_total_number}\nsub6:{sub6_count_before}→{sub6_total_number}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot"
+        with open('text.text', 'w', encoding='UTF-8') as f:
+            f.write(text)
 
         # 最新の免許数と現在の時刻をXMLファイルに書き込み保存
         with open('data/license_total_number_before.xml', 'w', encoding='UTF-8') as f:
-
             f.write(f'<?xml version="1.0" encoding="UTF-8" ?><musen_5G><mmwave_count>{mmWave_total_number}</mmwave_count><sub6_count>{sub6_total_number}</sub6_count><date>{now.strftime("%Y/%m/%d %H:%M")}</date></musen_5G>')
 
 # CSV保存
