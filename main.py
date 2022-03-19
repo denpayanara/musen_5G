@@ -1,12 +1,10 @@
 import datetime
-# import os
 import urllib.parse
 import xml.etree.ElementTree as ET
 
 import pandas as pd
 import requests
 import plotly.figure_factory as ff
-# import tweepy
 
 Rakuten_5G = {
     # 1:免許情報検索  2: 登録情報検索
@@ -88,18 +86,21 @@ df1.sort_index(inplace=True)
 df1["市区町村名"] = df1["市区町村名"].str.replace("^(添上郡|山辺郡|生駒郡|磯城郡|宇陀郡|高市郡|北葛城郡|吉野郡)", "", regex=True)
 
 df1["ミリ波"] = df1["ミリ波"].fillna(0).astype(int)
+
 df1["sub6"] = df1["sub6"].fillna(0).astype(int)
 
 df2 = df1.reindex(columns=["市区町村名", "ミリ波", "sub6"])
 
-df3 = df2.copy()
+df2.reset_index(inplace=True, drop=True)
 
-# 前回の値を詠み込み
+df3 = df2.copy() #df2は最新データとしてCSVで保存
+
+# 前回の値を読み込み
 old_data = pd.read_csv('data/Rakuten_5G.csv')
 
-df3['増減数1'] = df2['ミリ波'] - old_data['ミリ波']
+df3['増減数1'] = df3['ミリ波'] - old_data['ミリ波']
 
-df3['増減数2'] = df2['sub6'] - old_data['sub6']
+df3['増減数2'] = df3['sub6'] - old_data['sub6']
 
 df3 = df3[['市区町村名', 'ミリ波', '増減数1', 'sub6', '増減数2']]
 
@@ -149,7 +150,7 @@ if len(df_diff) > 0:
 
         # send_sns.pyで使うファイルを作成
         text = f"5G免許更新\n\nミリ波:{mmWave_count_before}→{mmWave_total_number}\nsub6:{sub6_count_before}→{sub6_total_number}\n\n発見状況\nhttps://script.google.com/macros/s/AKfycbzY-8ioQp6RiLnleR110Vq-1Yx9ODXtkXeMFwGY92-NxfIDQRU4s4t6sPBIvd9EOGUzRw/exec\n5G免状数は基地局数とは等しくありません\n\n#楽天モバイル #奈良 #bot"
-        with open('text.text', 'w', encoding='UTF-8') as f:
+        with open('data/text.text', 'w', encoding='UTF-8') as f:
             f.write(text)
 
         # 最新の免許数と現在の時刻をXMLファイルに書き込み保存
