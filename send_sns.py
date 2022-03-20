@@ -10,8 +10,11 @@ import tweepy
 tree = ET.parse('data/license_total_number_before.xml')
 date = datetime.datetime.strptime(tree.find('date').text, '%Y/%m/%d %H:%M').date()
 
+# 現在日時
+now = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
+
 # 最終更新日が今日だったらSNSに送信
-if date == datetime.date.today():
+if date == now.date():
 
     # テキストファイル読み込み
     with open('data/text.text', 'r') as f:
