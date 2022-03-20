@@ -79,7 +79,6 @@ df_code["場所"] = df_code["都道府県名"] + df_code["市区町村名"]
 df1 = pd.merge(df_code, df0, on=["場所"], how="left")
 df1["団体コード"] = df1["団体コード"].astype("Int64")
 
-df1.set_index("団体コード", inplace=True)
 df1.sort_index(inplace=True)
 
 # df1["市区町村名"]に含まれる郡名を削除
@@ -89,9 +88,7 @@ df1["ミリ波"] = df1["ミリ波"].fillna(0).astype(int)
 
 df1["sub6"] = df1["sub6"].fillna(0).astype(int)
 
-df2 = df1.reindex(columns=["市区町村名", "ミリ波", "sub6"])
-
-df2.reset_index(inplace=True, drop=True)
+df2 = df1.reindex(columns=["団体コード", "市区町村名", "ミリ波", "sub6"])
 
 df3 = df2.copy() #df2は最新データとしてCSVで保存
 
