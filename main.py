@@ -92,8 +92,12 @@ df2 = df1.reindex(columns=["団体コード", "市区町村名", "ミリ波", "s
 
 df3 = df2.copy() #df2は最新データとしてCSVで保存
 
+df3.set_index('団体コード', inplace=True)
+
 # 前回の値を読み込み
 old_data = pd.read_csv('data/Rakuten_5G.csv')
+
+old_data.set_index('団体コード', inplace=True)
 
 df3['増減数1'] = df3['ミリ波'] - old_data['ミリ波']
 
