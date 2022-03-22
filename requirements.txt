@@ -1,6 +1,4 @@
-pandas
-requests
-urllib3
-plotly
 kaleido
-tweepy
+pandas
+plotly
+requests
