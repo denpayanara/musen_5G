@@ -43,8 +43,8 @@ if date == now.date():
         messages = [
             TextSendMessage(text = text),
             ImageSendMessage(
-                original_content_url = 'https://github.com/denpayanara/musen_5G/blob/main/data/diff.png',
-                preview_image_url = 'https://github.com/denpayanara/musen_5G/blob/main/data/diff.png'
+                original_content_url = 'https://raw.githubusercontent.com/denpayanara/musen_5G/main/data/diff.png',
+                preview_image_url = 'https://raw.githubusercontent.com/denpayanara/musen_5G/main/data/diff.png'
             )
         ]
     )
