@@ -1,12 +1,14 @@
 import datetime
-import urllib.parse
+import json
+import ssl
+from urllib import request, parse
 import xml.etree.ElementTree as ET
 
 import pandas as pd
 import requests
 import plotly.figure_factory as ff
 
-#地方公共団体コード
+#地方公共団体コード
 PrefCode = {
     '滋賀県':25000,
     '京都府':26000,
@@ -50,10 +52,16 @@ total_number = {
 
 def musen_api(d):
 
-    parm = urllib.parse.urlencode(d, encoding="shift-jis")
-    r = requests.get("https://www.tele.soumu.go.jp/musen/list", parm)
+    params = parse.urlencode(d, encoding="shift-jis")
 
-    return r.json()
+    req = request.Request(f'https://www.tele.soumu.go.jp/musen/list?{params}')
+
+    ctx = ssl.create_default_context()
+
+    ctx.options |= 0x4
+
+    with request.urlopen(req, context=ctx) as res:
+        return json.loads(res.read())
 
 def band_select(d, start, end, unit):
 
