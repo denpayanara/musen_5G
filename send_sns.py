@@ -20,21 +20,22 @@ if date == now.date():
     with open('data/text.text', 'r') as f:
         text = f.read()
     
+    # Twitterは停止
     # Twitter
 
-    api_key = os.environ["API_KEY"]
-    api_secret = os.environ["API_SECRET_KEY"]
-    access_token = os.environ["ACCESS_TOKEN"]
-    access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
+    # api_key = os.environ["API_KEY"]
+    # api_secret = os.environ["API_SECRET_KEY"]
+    # access_token = os.environ["ACCESS_TOKEN"]
+    # access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-    auth = tweepy.OAuthHandler(api_key, api_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    # auth = tweepy.OAuthHandler(api_key, api_secret)
+    # auth.set_access_token(access_token, access_token_secret)
 
-    api = tweepy.API(auth)
-    media_ids = []
-    res_media_ids = api.media_upload("data/diff.png")
-    media_ids.append(res_media_ids.media_id)
-    api.update_status(status = text, media_ids = media_ids)
+    # api = tweepy.API(auth)
+    # media_ids = []
+    # res_media_ids = api.media_upload("data/diff.png")
+    # media_ids.append(res_media_ids.media_id)
+    # api.update_status(status = text, media_ids = media_ids)
 
     # LINE
     line_bot_api = LineBotApi(os.environ["LINE_CHANNEL_ACCESS_TOKEN"])
