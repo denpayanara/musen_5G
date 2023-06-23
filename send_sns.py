@@ -21,7 +21,6 @@ if date == now.date():
         text = f.read()
     
     # Twitter
-
     api_key = os.environ["API_KEY"]
     api_secret = os.environ["API_SECRET_KEY"]
     access_token = os.environ["ACCESS_TOKEN"]
