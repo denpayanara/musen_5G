@@ -52,9 +52,15 @@ total_number = {
 
 def musen_api(d):
 
-    params = parse.urlencode(d, encoding="shift-jis")
+    # APIリクエスト条件にShift_JIS(CP943C)を指定する様に記載があるが取得件数0件となる為utf-8を指定
+    params = parse.urlencode(d, encoding="utf-8")
 
-    req = request.Request(f'https://www.tele.soumu.go.jp/musen/list?{params}')
+    # ヘッダーが無いと403Forbidden
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    } 
+
+    req = request.Request(f'https://www.tele.soumu.go.jp/musen/list?{params}', headers=headers)
 
     ctx = ssl.create_default_context()
 
