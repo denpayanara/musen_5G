@@ -215,7 +215,8 @@ if len(df_diff) > 0:
     fig.layout.title.font.size = 10
     
     # scale=10だと400 Bad Request
-    fig.write_image('data/diff.png', engine='kaleido', scale=1)
+    # fig.write_image('data/diff.png', engine='kaleido', scale=1)
+    fig.write_image('data/diff.png', scale=1)
 
     # 文章作成
     text = '【5G免許更新】\n\n'
