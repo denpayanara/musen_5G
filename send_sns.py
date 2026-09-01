@@ -21,21 +21,21 @@ if date == now.date():
         text = f.read()
     
     # Twitter
-    api_key = os.environ["API_KEY"]
-    api_secret = os.environ["API_SECRET_KEY"]
-    access_token = os.environ["ACCESS_TOKEN"]
-    access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
+    # api_key = os.environ["API_KEY"]
+    # api_secret = os.environ["API_SECRET_KEY"]
+    # access_token = os.environ["ACCESS_TOKEN"]
+    # access_token_secret = os.environ["ACCESS_TOKEN_SECRET"]
 
-    auth = tweepy.OAuthHandler(api_key, api_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    # auth = tweepy.OAuthHandler(api_key, api_secret)
+    # auth.set_access_token(access_token, access_token_secret)
 
-    api = tweepy.API(auth)
-    client = tweepy.Client(consumer_key = api_key, consumer_secret = api_secret, access_token = access_token, access_token_secret = access_token_secret,)
+    # api = tweepy.API(auth)
+    # client = tweepy.Client(consumer_key = api_key, consumer_secret = api_secret, access_token = access_token, access_token_secret = access_token_secret,)
 
-    media_ids = []
-    res_media_ids = api.media_upload("data/diff.png")
-    media_ids.append(res_media_ids.media_id)
-    client.create_tweet(text = text, media_ids=media_ids)
+    # media_ids = []
+    # res_media_ids = api.media_upload("data/diff.png")
+    # media_ids.append(res_media_ids.media_id)
+    # client.create_tweet(text = text, media_ids=media_ids)
 
     # LINE
     line_bot_api = LineBotApi(os.environ["LINE_CHANNEL_ACCESS_TOKEN"])
